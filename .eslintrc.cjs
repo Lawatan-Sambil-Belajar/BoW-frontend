@@ -9,7 +9,7 @@ module.exports = {
         'airbnb-typescript',
         'prettier',
     ],
-    ignorePatterns: ['dist', '.eslintrc.cjs', 'node_modules', 'vite.config.ts'],
+    ignorePatterns: ['dist', '.eslintrc.cjs', 'node_modules', 'vite.config.ts', 'postcss.config.cjs'],
     parser: '@typescript-eslint/parser',
     parserOptions: {
         ecmaVersion: 'latest',
