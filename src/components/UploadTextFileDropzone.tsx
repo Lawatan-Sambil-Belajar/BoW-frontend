@@ -5,7 +5,7 @@ import { IconFileCheck, IconFileDescription, IconUpload, IconX } from '@tabler/i
 import { useState } from 'react';
 import classes from '../styles/UploadTextFileDropzone.module.css';
 
-export function UploadTextFileDropZone() {
+export function UploadTextFileDropzone() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const isMobile = useMediaQuery('(max-width: 520px)');

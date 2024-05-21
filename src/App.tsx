@@ -1,5 +1,5 @@
 import { Container, Stack, Title } from '@mantine/core';
-import { UploadTextFileDropZone } from './components/UploadTextFileDropZone';
+import { UploadTextFileDropzone } from './components/UploadTextFileDropzone';
 
 function App() {
     return (
@@ -7,7 +7,7 @@ function App() {
             <Stack align="center">
                 <Title>Bag of Words Visualisation</Title>
                 <Title order={2}>Upload a Text File!</Title>
-                <UploadTextFileDropZone />
+                <UploadTextFileDropzone />
             </Stack>
         </Container>
     );
