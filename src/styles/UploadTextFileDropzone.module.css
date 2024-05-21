@@ -1,0 +1,11 @@
+.dropzone {
+    width: 100%;
+    max-width: 35rem;
+}
+
+.dropzone-selected {
+    &[data-idle] {
+        background-color: var(--mantine-color-green-1);
+        border-color: var(--mantine-color-green-6);
+    }
+}

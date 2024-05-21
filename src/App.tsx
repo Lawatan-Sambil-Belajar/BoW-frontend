@@ -1,9 +1,14 @@
-import { Container } from '@mantine/core';
+import { Container, Stack, Title } from '@mantine/core';
+import { UploadTextFileDropZone } from './components/UploadTextFileDropZone';
 
 function App() {
     return (
         <Container>
-            <h1>Hello, world!</h1>
+            <Stack align="center">
+                <Title>Bag of Words Visualisation</Title>
+                <Title order={2}>Upload a Text File!</Title>
+                <UploadTextFileDropZone />
+            </Stack>
         </Container>
     );
 }
