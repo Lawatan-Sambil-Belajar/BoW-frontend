@@ -1,6 +1,5 @@
-import { Group, Text, rem } from '@mantine/core';
+import { Group, Text, rem, useMatches } from '@mantine/core';
 import { Dropzone } from '@mantine/dropzone';
-import { useMediaQuery } from '@mantine/hooks';
 import { IconFileCheck, IconFileDescription, IconUpload, IconX } from '@tabler/icons-react';
 import { useState } from 'react';
 import classes from '../styles/UploadTextFileDropzone.module.css';
@@ -8,7 +7,7 @@ import classes from '../styles/UploadTextFileDropzone.module.css';
 export function UploadTextFileDropzone() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    const isMobile = useMediaQuery('(max-width: 520px)');
+    const isMobile = useMatches({ base: true, xs: false });
     const textAlign = isMobile ? 'center' : 'left';
 
     return (
@@ -24,7 +23,7 @@ export function UploadTextFileDropzone() {
                 gap={isMobile ? 'xs' : 'lg'}
                 mih={220}
                 p={20}
-                style={{ pointerEvents: 'none' }}
+                style={{ pointerEvents: 'none', flexDirection: isMobile ? 'column' : 'row' }}
             >
                 <Dropzone.Accept>
                     <IconUpload
