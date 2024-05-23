@@ -1,4 +1,4 @@
-export const threadMetricsDTOList = [
+export const mockThreadMetricsDTOList = [
     {
         name: 'ForkJoinPool.commonPool-worker-9',
         executionTimeInMs: 437,

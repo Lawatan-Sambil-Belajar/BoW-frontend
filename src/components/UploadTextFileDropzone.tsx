@@ -1,11 +1,14 @@
 import { Group, Text, rem, useMatches } from '@mantine/core';
 import { Dropzone } from '@mantine/dropzone';
 import { IconFileCheck, IconFileDescription, IconUpload, IconX } from '@tabler/icons-react';
-import { useState } from 'react';
 import classes from '../styles/UploadTextFileDropzone.module.css';
 
-export function UploadTextFileDropzone() {
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+interface ComponentProps {
+    selectedFile: File | null;
+    setSelectedFile: (file: File | null) => void;
+}
+
+export function UploadTextFileDropzone({ selectedFile, setSelectedFile }: ComponentProps) {
 
     const isMobile = useMatches({ base: true, xs: false });
     const textAlign = isMobile ? 'center' : 'left';
