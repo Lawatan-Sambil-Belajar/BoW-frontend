@@ -45,7 +45,7 @@ export function ThreadProgress({ name, timeInMs, width }: ComponentProps) {
                 withBorder
             >
                 <Title order={3}>{name}</Title>
-                <Group w={400}>
+                <Group w={300}>
                     <motion.div
                         style={{ backgroundColor: 'var(--mantine-color-indigo-3)', height: 50 }}
                         variants={progressBar}
