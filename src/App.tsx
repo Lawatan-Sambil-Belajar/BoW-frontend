@@ -1,4 +1,4 @@
-import { Button, Container, Group, Stack, Text, Title } from '@mantine/core';
+import { Button, Container, Group, NumberInput, Stack, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import { ThreadProgress } from './components/ThreadProgress';
 import { UploadTextFileDropzone } from './components/UploadTextFileDropzone';
@@ -11,7 +11,8 @@ const LOCAL_URI = 'http://localhost:8080';
 function App() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [visualisationData, setVisualisationData] = useState<VisualisationData>();
-    console.log(visualisationData);
+    const [toggleReplay, setToggleReplay] = useState<boolean>(false);
+    const [slowFactor, setSlowFactor] = useState<string | number>(1);
 
     const onStartVisualisation = async () => {
         if (selectedFile === null) return;
@@ -32,6 +33,11 @@ function App() {
         };
 
         setVisualisationData(data);
+        setToggleReplay(!toggleReplay);
+    };
+
+    const onReplayVisualisation = () => {
+        setToggleReplay(!toggleReplay);
     };
 
     const concurrent1Max = visualisationData?.concurrent1.threadMetricsDTOList.reduce(
@@ -45,7 +51,10 @@ function App() {
     );
 
     return (
-        <Container size="xl">
+        <Container
+            size="xl"
+            pb={100}
+        >
             <Stack align="center">
                 <Title>Bag of Words Visualisation</Title>
                 <Title order={2}>Upload a Text File!</Title>
@@ -53,14 +62,29 @@ function App() {
                     selectedFile={selectedFile}
                     setSelectedFile={setSelectedFile}
                 />
-                <Button
-                    size="md"
-                    onClick={onStartVisualisation}
-                >
-                    Start Visualisation
-                </Button>
+                <NumberInput
+                    label="Slow Factor"
+                    value={slowFactor}
+                    onChange={setSlowFactor}
+                    min={1}
+                />
+                <Group>
+                    <Button
+                        size="md"
+                        onClick={onStartVisualisation}
+                    >
+                        Start Visualisation
+                    </Button>
+                    <Button
+                        size="md"
+                        onClick={onReplayVisualisation}
+                    >
+                        Replay Visualisation
+                    </Button>
+                </Group>
                 {visualisationData && !!concurrent1Max && !!concurrent2Max && (
                     <Group
+                        key={String(toggleReplay)}
                         gap={30}
                         justify="space-evenly"
                         align="flex-start"
@@ -68,37 +92,42 @@ function App() {
                     >
                         <Stack align="center">
                             <Title order={3}>Sequential</Title>
+                            <Text>Total time: {visualisationData.sequential.executionTimeInMs} ms</Text>
                             <ThreadProgress
                                 name="Main Thread"
+                                slowFactor={Number(slowFactor)}
                                 timeInMs={visualisationData.sequential.executionTimeInMs}
                                 width={210}
                             />
-                            <Text>Total time: {visualisationData.sequential.executionTimeInMs} ms</Text>
                         </Stack>
                         <Stack align="center">
                             <Title order={3}>Concurrent 1</Title>
+                            <Text>Total time: {visualisationData.concurrent1.executionTimeInMs} ms</Text>
                             {visualisationData.concurrent1.threadMetricsDTOList.map((threadMetricsDTO, index) => (
                                 <ThreadProgress
                                     key={threadMetricsDTO.name}
                                     name={`Thread ${index + 1}`}
+                                    slowFactor={Number(slowFactor)}
                                     timeInMs={threadMetricsDTO.executionTimeInMs}
                                     width={(threadMetricsDTO.executionTimeInMs / concurrent1Max) * 210}
                                 />
                             ))}
-                            <Text>Total time: {visualisationData.concurrent1.executionTimeInMs} ms</Text>
                         </Stack>
                         <Stack align="center">
                             <Title order={3}>Concurrent 2</Title>
+                            <Text>Total time: {visualisationData.concurrent2.executionTimeInMs} ms</Text>
                             {visualisationData.concurrent2.threadMetricsDTOList.map((threadMetricsDTO, index) => (
                                 <ThreadProgress
                                     key={threadMetricsDTO.name}
                                     name={`Thread ${index + 1}`}
+                                    slowFactor={Number(slowFactor)}
                                     timeInMs={threadMetricsDTO.executionTimeInMs}
                                     width={(threadMetricsDTO.executionTimeInMs / concurrent2Max) * 210}
                                 />
                             ))}
                             <ThreadProgress
                                 name="Time taken to combine"
+                                slowFactor={Number(slowFactor)}
                                 timeInMs={visualisationData.concurrent2.executionTimeInMs - concurrent2Max}
                                 width={
                                     ((visualisationData.concurrent2.executionTimeInMs - concurrent2Max) /
@@ -106,7 +135,6 @@ function App() {
                                     210
                                 }
                             />
-                            <Text>Total time: {visualisationData.concurrent2.executionTimeInMs} ms</Text>
                         </Stack>
                     </Group>
                 )}

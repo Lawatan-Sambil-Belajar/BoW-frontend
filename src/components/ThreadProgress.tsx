@@ -5,9 +5,10 @@ interface ComponentProps {
     name: string;
     timeInMs: number;
     width: number;
+    slowFactor?: number;
 }
 
-export function ThreadProgress({ name, timeInMs, width }: ComponentProps) {
+export function ThreadProgress({ name, timeInMs, width, slowFactor = 1 }: ComponentProps) {
     const container = {
         visible: {
             scale: 1,
@@ -25,12 +26,12 @@ export function ThreadProgress({ name, timeInMs, width }: ComponentProps) {
 
     const progressBar = {
         hidden: { width: 0 },
-        visible: { width, transition: { duration: timeInSeconds, ease: 'linear' } },
+        visible: { width, transition: { duration: timeInSeconds * slowFactor, ease: 'linear' } },
     };
 
     const time = {
         hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { delay: timeInSeconds + 1, ease: 'easeIn' } },
+        visible: { opacity: 1, transition: { delay: timeInSeconds * slowFactor + 1, ease: 'easeIn' } },
     };
 
     return (
