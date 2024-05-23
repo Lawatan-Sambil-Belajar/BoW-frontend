@@ -26,7 +26,7 @@ export function ThreadProgress({ name, timeInMs, width, slowFactor = 1 }: Compon
 
     const progressBar = {
         hidden: { width: 0 },
-        visible: { width, transition: { duration: timeInSeconds * slowFactor, ease: 'linear' } },
+        visible: { width, transition: { duration: timeInSeconds * slowFactor, ease: 'easeOut' } },
     };
 
     const time = {

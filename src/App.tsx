@@ -20,9 +20,21 @@ function App() {
         const formData = new FormData();
         formData.append('textFile', selectedFile as Blob);
         setLoading(true);
-        const sequentialResponse = await fetch(`${LOCAL_URI}/bow/sequential`, { method: 'POST', body: formData });
-        const concurrent1Response = await fetch(`${LOCAL_URI}/bow/concurrent/1`, { method: 'POST', body: formData });
-        const concurrent2Response = await fetch(`${LOCAL_URI}/bow/concurrent/2`, { method: 'POST', body: formData });
+        const sequentialResponse = await fetch(`${LOCAL_URI}/bow/sequential`, {
+            method: 'POST',
+            body: formData,
+            cache: 'no-cache',
+        });
+        const concurrent1Response = await fetch(`${LOCAL_URI}/bow/concurrent/1`, {
+            method: 'POST',
+            body: formData,
+            cache: 'no-cache',
+        });
+        const concurrent2Response = await fetch(`${LOCAL_URI}/bow/concurrent/2`, {
+            method: 'POST',
+            body: formData,
+            cache: 'no-cache',
+        });
 
         const sequentialData = (await sequentialResponse.json()) as SequentialResponse;
         const concurrent1Data = (await concurrent1Response.json()) as ConcurrentResponse;
