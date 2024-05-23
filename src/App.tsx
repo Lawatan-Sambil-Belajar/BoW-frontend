@@ -1,4 +1,4 @@
-import { Button, Container, Group, NumberInput, Stack, Text, Title } from '@mantine/core';
+import { Button, Container, Group, LoadingOverlay, NumberInput, Stack, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import { ThreadProgress } from './components/ThreadProgress';
 import { UploadTextFileDropzone } from './components/UploadTextFileDropzone';
@@ -13,11 +13,13 @@ function App() {
     const [visualisationData, setVisualisationData] = useState<VisualisationData>();
     const [toggleReplay, setToggleReplay] = useState<boolean>(false);
     const [slowFactor, setSlowFactor] = useState<string | number>(1);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const onStartVisualisation = async () => {
         if (selectedFile === null) return;
         const formData = new FormData();
         formData.append('textFile', selectedFile as Blob);
+        setLoading(true);
         const sequentialResponse = await fetch(`${LOCAL_URI}/bow/sequential`, { method: 'POST', body: formData });
         const concurrent1Response = await fetch(`${LOCAL_URI}/bow/concurrent/1`, { method: 'POST', body: formData });
         const concurrent2Response = await fetch(`${LOCAL_URI}/bow/concurrent/2`, { method: 'POST', body: formData });
@@ -32,6 +34,7 @@ function App() {
             concurrent2: concurrent2Data,
         };
 
+        setLoading(false);
         setVisualisationData(data);
         setToggleReplay(!toggleReplay);
     };
@@ -55,7 +58,10 @@ function App() {
             size="xl"
             pb={100}
         >
-            <Stack align="center">
+            <Stack
+                align="center"
+                pos="relative"
+            >
                 <Title>Bag of Words Visualisation</Title>
                 <Title order={2}>Upload a Text File!</Title>
                 <UploadTextFileDropzone
@@ -82,7 +88,7 @@ function App() {
                         Replay Visualisation
                     </Button>
                 </Group>
-                {visualisationData && !!concurrent1Max && !!concurrent2Max && (
+                {!loading && visualisationData && !!concurrent1Max && !!concurrent2Max && (
                     <Group
                         key={String(toggleReplay)}
                         gap={30}
@@ -138,6 +144,7 @@ function App() {
                         </Stack>
                     </Group>
                 )}
+                <LoadingOverlay visible={loading} />
             </Stack>
         </Container>
     );
