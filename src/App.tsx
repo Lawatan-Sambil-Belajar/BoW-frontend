@@ -2,8 +2,7 @@ import { Button, Container, Group, LoadingOverlay, NumberInput, Stack, Text, Tit
 import { useState } from 'react';
 import { ThreadProgress } from './components/ThreadProgress';
 import { UploadTextFileDropzone } from './components/UploadTextFileDropzone';
-import { ConcurrentResponse } from './types/ConcurrentResponse';
-import { SequentialResponse } from './types/SequentialResponse';
+import { AllResponse } from './types/AllResponse';
 import { VisualisationData } from './types/VisualisationData';
 
 const LOCAL_URI = 'http://localhost:8080';
@@ -20,30 +19,19 @@ function App() {
         const formData = new FormData();
         formData.append('textFile', selectedFile as Blob);
         setLoading(true);
-        const sequentialResponse = await fetch(`${LOCAL_URI}/bow/sequential`, {
-            method: 'POST',
-            body: formData,
-            cache: 'no-cache',
-        });
-        const concurrent1Response = await fetch(`${LOCAL_URI}/bow/concurrent/1`, {
-            method: 'POST',
-            body: formData,
-            cache: 'no-cache',
-        });
-        const concurrent2Response = await fetch(`${LOCAL_URI}/bow/concurrent/2`, {
+
+        const allResponse = await fetch(`${LOCAL_URI}/bow/all`, {
             method: 'POST',
             body: formData,
             cache: 'no-cache',
         });
 
-        const sequentialData = (await sequentialResponse.json()) as SequentialResponse;
-        const concurrent1Data = (await concurrent1Response.json()) as ConcurrentResponse;
-        const concurrent2Data = (await concurrent2Response.json()) as ConcurrentResponse;
+        const result = (await allResponse.json()) as AllResponse;
 
         const data = {
-            sequential: sequentialData,
-            concurrent1: concurrent1Data,
-            concurrent2: concurrent2Data,
+            sequential: result[0],
+            concurrent1: result[1],
+            concurrent2: result[2],
         };
 
         setLoading(false);
