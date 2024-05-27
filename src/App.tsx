@@ -1,5 +1,6 @@
 import { Button, Container, Group, LoadingOverlay, NumberInput, Stack, Text, Title } from '@mantine/core';
 import { ResponsiveBar } from '@nivo/bar';
+import { ResponsiveLine } from '@nivo/line';
 import { useMemo, useState } from 'react';
 import { ThreadProgress } from './components/ThreadProgress';
 import { UploadTextFileDropzone } from './components/UploadTextFileDropzone';
@@ -74,6 +75,20 @@ function App() {
         [pastResults],
     );
 
+    const pastResultLineData = pastResults.reduce(
+        (result, curr, index) => {
+            result[0].data.push({ y: curr.sequential.executionTimeInMs, x: index + 1 });
+            result[1].data.push({ y: curr.concurrent1.executionTimeInMs, x: index + 1 });
+            result[2].data.push({ y: curr.concurrent2.executionTimeInMs, x: index + 1 });
+            return result;
+        },
+        [
+            { id: 'Sequential', data: [] as { x: number; y: number }[] },
+            { id: 'Concurrent 1', data: [] as { x: number; y: number }[] },
+            { id: 'Concurrent 2', data: [] as { x: number; y: number }[] },
+        ],
+    );
+
     return (
         <Container
             size="xl"
@@ -141,8 +156,65 @@ function App() {
                                 modifiers: [['darker', 1.6]],
                             }}
                             theme={{
-                                axis: { legend: { text: { fontWeight: 600, fill: 'rgb(111,111,111)', fontSize: 13 } } },
+                                axis: {
+                                    legend: { text: { fontWeight: 600, fill: 'rgb(111,111,111)', fontSize: 13 } },
+                                },
                             }}
+                        />
+                    </div>
+                )}
+
+                {pastResults.length > 1 && (
+                    <div style={{ width: '100%', maxWidth: '640px', height: '400px' }}>
+                        <ResponsiveLine
+                            data={pastResultLineData}
+                            margin={{ top: 50, bottom: 50, left: 60, right: 120 }}
+                            axisBottom={{
+                                legend: 'Runs',
+                                legendPosition: 'middle',
+                                legendOffset: 40,
+                            }}
+                            axisLeft={{
+                                legend: 'Execution Time (ms)',
+                                legendPosition: 'middle',
+                                legendOffset: -50,
+                            }}
+                            theme={{
+                                axis: {
+                                    legend: { text: { fontWeight: 600, fill: 'rgb(111,111,111)', fontSize: 13 } },
+                                },
+                            }}
+                            yFormat=" >-.2f"
+                            pointSize={10}
+                            pointColor="white"
+                            pointBorderColor={{ from: 'serieColor' }}
+                            pointBorderWidth={2}
+                            legends={[
+                                {
+                                    anchor: 'bottom-right',
+                                    direction: 'column',
+                                    justify: false,
+                                    translateX: 100,
+                                    translateY: 0,
+                                    itemsSpacing: 0,
+                                    itemDirection: 'left-to-right',
+                                    itemWidth: 80,
+                                    itemHeight: 20,
+                                    itemOpacity: 0.75,
+                                    symbolSize: 12,
+                                    symbolShape: 'circle',
+                                    symbolBorderColor: 'rgba(0, 0, 0, .5)',
+                                    effects: [
+                                        {
+                                            on: 'hover',
+                                            style: {
+                                                itemBackground: 'rgba(0, 0, 0, .03)',
+                                                itemOpacity: 1,
+                                            },
+                                        },
+                                    ],
+                                },
+                            ]}
                         />
                     </div>
                 )}
