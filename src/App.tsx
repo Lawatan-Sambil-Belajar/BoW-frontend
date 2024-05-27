@@ -1,5 +1,6 @@
 import { Button, Container, Group, LoadingOverlay, NumberInput, Stack, Text, Title } from '@mantine/core';
-import { useState } from 'react';
+import { ResponsiveBar } from '@nivo/bar';
+import { useMemo, useState } from 'react';
 import { ThreadProgress } from './components/ThreadProgress';
 import { UploadTextFileDropzone } from './components/UploadTextFileDropzone';
 import { AllResponse } from './types/AllResponse';
@@ -9,10 +10,10 @@ const LOCAL_URI = 'http://localhost:8080';
 
 function App() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [visualisationData, setVisualisationData] = useState<VisualisationData>();
     const [toggleReplay, setToggleReplay] = useState<boolean>(false);
     const [slowFactor, setSlowFactor] = useState<string | number>(1);
     const [loading, setLoading] = useState<boolean>(false);
+    const [pastResults, setPastResults] = useState<VisualisationData[]>([]);
 
     const onStartVisualisation = async () => {
         if (selectedFile === null) return;
@@ -35,7 +36,7 @@ function App() {
         };
 
         setLoading(false);
-        setVisualisationData(data);
+        setPastResults([...pastResults, data]);
         setToggleReplay(!toggleReplay);
     };
 
@@ -43,14 +44,34 @@ function App() {
         setToggleReplay(!toggleReplay);
     };
 
-    const concurrent1Max = visualisationData?.concurrent1.threadMetricsDTOList.reduce(
+    const lastResult = pastResults[pastResults.length - 1];
+
+    const concurrent1Max = lastResult?.concurrent1.threadMetricsDTOList.reduce(
         (acc, curr) => (acc > curr.executionTimeInMs ? acc : curr.executionTimeInMs),
         0,
     );
 
-    const concurrent2Max = visualisationData?.concurrent2.threadMetricsDTOList.reduce(
+    const concurrent2Max = lastResult?.concurrent2.threadMetricsDTOList.reduce(
         (acc, curr) => (acc > curr.executionTimeInMs ? acc : curr.executionTimeInMs),
         0,
+    );
+
+    const averageResult = useMemo(
+        () =>
+            pastResults.reduce(
+                (result, curr) => {
+                    result[0].executionTimeInMs += curr.sequential.executionTimeInMs / pastResults.length;
+                    result[1].executionTimeInMs += curr.concurrent1.executionTimeInMs / pastResults.length;
+                    result[2].executionTimeInMs += curr.concurrent2.executionTimeInMs / pastResults.length;
+                    return result;
+                },
+                [
+                    { name: 'Sequential', executionTimeInMs: 0 },
+                    { name: 'Concurrent 1', executionTimeInMs: 0 },
+                    { name: 'Concurrent 2', executionTimeInMs: 0 },
+                ],
+            ),
+        [pastResults],
     );
 
     return (
@@ -88,7 +109,45 @@ function App() {
                         Replay Visualisation
                     </Button>
                 </Group>
-                {!loading && visualisationData && !!concurrent1Max && !!concurrent2Max && (
+                {pastResults.length > 0 && (
+                    <div style={{ width: '100%', maxWidth: '640px', height: '400px' }}>
+                        <ResponsiveBar
+                            indexBy="name"
+                            data={averageResult}
+                            keys={['executionTimeInMs']}
+                            margin={{ top: 50, bottom: 50, left: 60, right: 60 }}
+                            axisBottom={{
+                                legend: 'Implementation Type',
+                                legendPosition: 'middle',
+                                legendOffset: 40,
+                            }}
+                            axisLeft={{
+                                legend: 'Average Execution Time (ms)',
+                                legendPosition: 'middle',
+                                legendOffset: -50,
+                            }}
+                            valueScale={{ type: 'linear' }}
+                            indexScale={{ type: 'band', round: true }}
+                            colors={({ index }) => {
+                                if (index === 0) return 'rgb(226,194,164)';
+                                if (index === 1) return 'rgb(228,124,103)';
+                                if (index === 2) return 'rgb(238,226,113)';
+                                return 'black';
+                            }}
+                            labelSkipWidth={12}
+                            labelSkipHeight={12}
+                            labelTextColor={{
+                                from: 'color',
+                                modifiers: [['darker', 1.6]],
+                            }}
+                            theme={{
+                                axis: { legend: { text: { fontWeight: 600, fill: 'rgb(111,111,111)', fontSize: 13 } } },
+                            }}
+                        />
+                    </div>
+                )}
+
+                {!loading && lastResult && (
                     <Group
                         key={String(toggleReplay)}
                         gap={30}
@@ -98,18 +157,18 @@ function App() {
                     >
                         <Stack align="center">
                             <Title order={3}>Sequential</Title>
-                            <Text>Total time: {visualisationData.sequential.executionTimeInMs} ms</Text>
+                            <Text>Total time: {lastResult.sequential.executionTimeInMs} ms</Text>
                             <ThreadProgress
                                 name="Main Thread"
                                 slowFactor={Number(slowFactor)}
-                                timeInMs={visualisationData.sequential.executionTimeInMs}
+                                timeInMs={lastResult.sequential.executionTimeInMs}
                                 width={210}
                             />
                         </Stack>
                         <Stack align="center">
                             <Title order={3}>Concurrent 1</Title>
-                            <Text>Total time: {visualisationData.concurrent1.executionTimeInMs} ms</Text>
-                            {visualisationData.concurrent1.threadMetricsDTOList.map((threadMetricsDTO, index) => (
+                            <Text>Total time: {lastResult.concurrent1.executionTimeInMs} ms</Text>
+                            {lastResult.concurrent1.threadMetricsDTOList.map((threadMetricsDTO, index) => (
                                 <ThreadProgress
                                     key={threadMetricsDTO.name}
                                     name={`Thread ${index + 1}`}
@@ -121,8 +180,8 @@ function App() {
                         </Stack>
                         <Stack align="center">
                             <Title order={3}>Concurrent 2</Title>
-                            <Text>Total time: {visualisationData.concurrent2.executionTimeInMs} ms</Text>
-                            {visualisationData.concurrent2.threadMetricsDTOList.map((threadMetricsDTO, index) => (
+                            <Text>Total time: {lastResult.concurrent2.executionTimeInMs} ms</Text>
+                            {lastResult.concurrent2.threadMetricsDTOList.map((threadMetricsDTO, index) => (
                                 <ThreadProgress
                                     key={threadMetricsDTO.name}
                                     name={`Thread ${index + 1}`}
@@ -134,11 +193,9 @@ function App() {
                             <ThreadProgress
                                 name="Time taken to combine"
                                 slowFactor={Number(slowFactor)}
-                                timeInMs={visualisationData.concurrent2.executionTimeInMs - concurrent2Max}
+                                timeInMs={lastResult.concurrent2.executionTimeInMs - concurrent2Max}
                                 width={
-                                    ((visualisationData.concurrent2.executionTimeInMs - concurrent2Max) /
-                                        concurrent2Max) *
-                                    210
+                                    ((lastResult.concurrent2.executionTimeInMs - concurrent2Max) / concurrent2Max) * 210
                                 }
                             />
                         </Stack>

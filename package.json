@@ -17,6 +17,8 @@
         "@mantine/core": "^7.9.2",
         "@mantine/dropzone": "^7.9.2",
         "@mantine/hooks": "^7.9.2",
+        "@nivo/bar": "^0.87.0",
+        "@nivo/line": "^0.87.0",
         "@tabler/icons-react": "^3.4.0",
         "framer-motion": "^11.2.6",
         "react": "^18.2.0",
