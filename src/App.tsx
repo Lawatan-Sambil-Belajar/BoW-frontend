@@ -273,6 +273,12 @@ function App() {
                         </Stack>
                     </Group>
                 )}
+                <Title>Result in JSON</Title>
+                {lastResult && (
+                    <p style={{ flex: 1, textWrap: 'pretty', wordBreak: 'break-word' }}>
+                        {JSON.stringify(lastResult.sequential.bagOfWords)}
+                    </p>
+                )}
                 <LoadingOverlay visible={loading} />
             </Stack>
         </Container>
