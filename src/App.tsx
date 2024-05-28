@@ -2,6 +2,7 @@ import { Button, Container, Group, LoadingOverlay, NumberInput, Stack, Text, Tit
 import { useMemo, useState } from 'react';
 import { AverageResultBarChart } from './components/AverageResultBarChart';
 import { PastResultLineChart } from './components/PastResultLineChart';
+import { ResultTable } from './components/ResultTable';
 import { ThreadProgress } from './components/ThreadProgress';
 import { UploadTextFileDropzone } from './components/UploadTextFileDropzone';
 import { AllResponse } from './types/AllResponse';
@@ -83,11 +84,16 @@ function App() {
             return result;
         },
         [
-            { id: 'Sequential', data: [] as { x: number; y: number }[] },
-            { id: 'Concurrent 1', data: [] as { x: number; y: number }[] },
-            { id: 'Concurrent 2', data: [] as { x: number; y: number }[] },
+            { id: 'Sequential', data: [] as { x: number; y: number; }[] },
+            { id: 'Concurrent 1', data: [] as { x: number; y: number; }[] },
+            { id: 'Concurrent 2', data: [] as { x: number; y: number; }[] },
         ],
     );
+
+    let tableData: [string, number][] = [];
+    if (lastResult) {
+        tableData = Object.entries(lastResult?.sequential.bagOfWords).sort((a, b) => b[1] - a[1]);
+    }
 
     return (
         <Container
@@ -190,12 +196,10 @@ function App() {
                     </Group>
                 )}
                 {lastResult && !loading && (
-                    <>
-                        <Title>Result in JSON</Title>
-                        <p style={{ flex: 1, textWrap: 'pretty', wordBreak: 'break-word' }}>
-                            {JSON.stringify(lastResult.sequential.bagOfWords)}
-                        </p>
-                    </>
+                    <Stack align="center" style={{ width: '80%'}}>
+                        <Title>Results</Title>
+                        <ResultTable data={tableData} rowPerPage={10} />
+                    </Stack>
                 )}
                 <LoadingOverlay visible={loading} />
             </Stack>
