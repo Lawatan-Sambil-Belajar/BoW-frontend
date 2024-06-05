@@ -184,14 +184,6 @@ function App() {
                                     width={(threadMetricsDTO.executionTimeInMs / concurrent2Max) * 210}
                                 />
                             ))}
-                            <ThreadProgress
-                                name="Time taken to combine"
-                                slowFactor={Number(slowFactor)}
-                                timeInMs={lastResult.concurrent2.executionTimeInMs - concurrent2Max}
-                                width={
-                                    ((lastResult.concurrent2.executionTimeInMs - concurrent2Max) / concurrent2Max) * 210
-                                }
-                            />
                         </Stack>
                     </Group>
                 )}
