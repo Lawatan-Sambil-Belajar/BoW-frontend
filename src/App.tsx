@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { Button, Container, Group, LoadingOverlay, NumberInput, Stack, Text, Title } from '@mantine/core';
 import { useMemo, useState } from 'react';
 import { AverageResultBarChart } from './components/AverageResultBarChart';
@@ -76,6 +77,20 @@ function App() {
         [pastResults],
     );
 
+    const meanSquaredErrors: [number, number, number] = pastResults.reduce(
+        (result, curr) => {
+            result[0] += (curr.sequential.executionTimeInMs - averageResult[0].executionTimeInMs) ** 2;
+            result[1] += (curr.concurrent1.executionTimeInMs - averageResult[1].executionTimeInMs) ** 2;
+            result[2] += (curr.concurrent2.executionTimeInMs - averageResult[2].executionTimeInMs) ** 2;
+            return result;
+        },
+        [0, 0, 0],
+    );
+
+    const pastResultsStandardDeviation = meanSquaredErrors.map((meanSquaredError) =>
+        Math.sqrt(meanSquaredError / pastResults.length),
+    );
+
     const pastResultLineData = pastResults.reduce(
         (result, curr, index) => {
             result[0].data.push({ y: curr.sequential.executionTimeInMs, x: index + 1 });
@@ -146,14 +161,17 @@ function App() {
                                 sequential: {
                                     times: allSequentialTime,
                                     averageTime: averageResult[0].executionTimeInMs,
+                                    standardDeviation: pastResultsStandardDeviation[0],
                                 },
                                 concurrent1: {
                                     times: allConcurrent1Time,
                                     averageTime: averageResult[1].executionTimeInMs,
+                                    standardDeviation: pastResultsStandardDeviation[1],
                                 },
                                 concurrent2: {
                                     times: allConcurrent2Time,
                                     averageTime: averageResult[2].executionTimeInMs,
+                                    standardDeviation: pastResultsStandardDeviation[2],
                                 },
                                 bagOfWords: pastResults[0].sequential.bagOfWords,
                             };
