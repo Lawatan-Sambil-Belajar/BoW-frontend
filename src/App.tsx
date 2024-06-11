@@ -84,9 +84,9 @@ function App() {
             return result;
         },
         [
-            { id: 'Sequential', data: [] as { x: number; y: number; }[] },
-            { id: 'Concurrent 1', data: [] as { x: number; y: number; }[] },
-            { id: 'Concurrent 2', data: [] as { x: number; y: number; }[] },
+            { id: 'Sequential', data: [] as { x: number; y: number }[] },
+            { id: 'Concurrent 1', data: [] as { x: number; y: number }[] },
+            { id: 'Concurrent 2', data: [] as { x: number; y: number }[] },
         ],
     );
 
@@ -130,6 +130,44 @@ function App() {
                         Replay Visualisation
                     </Button>
                 </Group>
+                {pastResults.length > 0 && (
+                    <Button
+                        size="md"
+                        onClick={() => {
+                            const a = document.createElement('a');
+                            const allSequentialTime = pastResults.map((result) => result.sequential.executionTimeInMs);
+                            const allConcurrent1Time = pastResults.map(
+                                (result) => result.concurrent1.executionTimeInMs,
+                            );
+                            const allConcurrent2Time = pastResults.map(
+                                (result) => result.concurrent2.executionTimeInMs,
+                            );
+                            const allData = {
+                                sequential: {
+                                    times: allSequentialTime,
+                                    averageTime: averageResult[0].executionTimeInMs,
+                                },
+                                concurrent1: {
+                                    times: allConcurrent1Time,
+                                    averageTime: averageResult[1].executionTimeInMs,
+                                },
+                                concurrent2: {
+                                    times: allConcurrent2Time,
+                                    averageTime: averageResult[2].executionTimeInMs,
+                                },
+                                bagOfWords: pastResults[0].sequential.bagOfWords,
+                            };
+                            a.href = URL.createObjectURL(
+                                new Blob([JSON.stringify(allData, null, '    ')], { type: 'application/json' }),
+                            );
+                            a.download = 'results.json';
+                            a.click();
+                            a.remove();
+                        }}
+                    >
+                        Download Results
+                    </Button>
+                )}
                 {pastResults.length > 0 && (
                     <div style={{ width: '100%', maxWidth: '640px', height: '400px' }}>
                         <AverageResultBarChart data={averageResult} />
@@ -188,9 +226,15 @@ function App() {
                     </Group>
                 )}
                 {lastResult && !loading && (
-                    <Stack align="center" style={{ width: '80%'}}>
+                    <Stack
+                        align="center"
+                        style={{ width: '80%' }}
+                    >
                         <Title>Results</Title>
-                        <ResultTable data={tableData} rowPerPage={10} />
+                        <ResultTable
+                            data={tableData}
+                            rowPerPage={10}
+                        />
                     </Stack>
                 )}
                 <LoadingOverlay visible={loading} />
